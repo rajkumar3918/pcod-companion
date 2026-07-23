@@ -1,0 +1,107 @@
+import { useState, useEffect } from "react";
+import { Flame, Check } from "lucide-react";
+import { sans, serif, C } from "../data/theme";
+import { HABITS } from "../data/habits";
+import { todayKey } from "../utils/dates";
+import { useAuth } from "../contexts/AuthContext";
+import { getLog, setLog } from "../firebase/firestore";
+
+// Streak = consecutive days (walking backward from today, or from
+// yesterday if nothing is checked yet today) with at least one habit done.
+async function computeStreak(uid) {
+  let count = 0;
+  const todayLog = await getLog(uid, todayKey(0));
+  const todayHabits = todayLog && todayLog.habits ? todayLog.habits : {};
+  const todayHasAny = Object.values(todayHabits).some(Boolean);
+  let offset = todayHasAny ? 0 : 1;
+  if (offset === 0) count = 1;
+  for (let i = offset; i < 45; i++) {
+    const log = await getLog(uid, todayKey(i));
+    const habits = log && log.habits ? log.habits : {};
+    if (Object.values(habits).some(Boolean)) count++;
+    else break;
+  }
+  return count;
+}
+
+export default function TrackerScreen() {
+  const { user } = useAuth();
+  const [checked, setChecked] = useState({});
+  const [streak, setStreak] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    if (!user) return;
+    (async () => {
+      const log = await getLog(user.uid, todayKey(0));
+      if (mounted) setChecked((log && log.habits) || {});
+      const s = await computeStreak(user.uid);
+      if (mounted) setStreak(s);
+      if (mounted) setLoading(false);
+    })();
+    return () => { mounted = false; };
+  }, [user]);
+
+  const toggle = async (id) => {
+    const next = { ...checked, [id]: !checked[id] };
+    setChecked(next);
+    try {
+      await setLog(user.uid, todayKey(0), { habits: next });
+    } catch (e) {
+      console.error("Failed to save habit", e);
+    }
+    const s = await computeStreak(user.uid);
+    setStreak(s);
+  };
+
+  const doneCount = Object.values(checked).filter(Boolean).length;
+  const pct = Math.round((doneCount / HABITS.length) * 100);
+
+  if (loading) {
+    return <div style={{ padding: 24, fontFamily: sans, color: C.muted, fontSize: 13 }}>Loading habits…</div>;
+  }
+
+  return (
+    <div style={{ padding: "18px 16px 30px" }}>
+      <p style={{ fontFamily: serif, fontWeight: 700, fontSize: 23, color: C.ink, margin: "0 0 4px" }}>Daily habits</p>
+      <p style={{ fontFamily: sans, fontSize: 12.5, color: C.muted, margin: "0 0 18px" }}>Small consistent habits move PCOD markers over weeks, not days.</p>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 16, background: C.white, border: `1px solid ${C.line}`, borderRadius: 18, padding: "16px 18px", marginBottom: 18, boxShadow: "0 2px 10px rgba(40,39,31,0.05)" }}>
+        <div style={{ width: 62, height: 62, borderRadius: "50%", background: `conic-gradient(${C.forest} ${pct * 3.6}deg, ${C.forestLight} 0deg)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <div style={{ width: 48, height: 48, borderRadius: "50%", background: C.white, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontFamily: sans, fontWeight: 800, fontSize: 13, color: C.forest }}>{pct}%</span>
+          </div>
+        </div>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <Flame size={16} color={C.mustard} />
+            <span style={{ fontFamily: serif, fontWeight: 700, fontSize: 17, color: C.ink }}>{streak}-day streak</span>
+          </div>
+          <p style={{ fontFamily: sans, fontSize: 12, color: C.muted, margin: "3px 0 0" }}>{doneCount} of {HABITS.length} done today</p>
+        </div>
+      </div>
+
+      <div style={{ background: C.white, borderRadius: 18, border: `1px solid ${C.line}`, overflow: "hidden" }}>
+        {HABITS.map((h, i) => {
+          const isOn = !!checked[h.id];
+          return (
+            <button key={h.id} onClick={() => toggle(h.id)} style={{
+              width: "100%", display: "flex", alignItems: "center", gap: 12, textAlign: "left",
+              border: "none", background: "none", padding: "13px 16px",
+              borderBottom: i < HABITS.length - 1 ? `1px solid ${C.line}` : "none", cursor: "pointer",
+            }}>
+              <div style={{ width: 22, height: 22, borderRadius: 7, flexShrink: 0, border: isOn ? "none" : `2px solid ${C.line}`, background: isOn ? C.forest : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {isOn && <Check size={14} color={C.white} strokeWidth={3} />}
+              </div>
+              <span style={{ fontFamily: sans, fontSize: 13.5, color: isOn ? C.faint : C.ink, textDecoration: isOn ? "line-through" : "none", fontWeight: 600 }}>{h.label}</span>
+            </button>
+          );
+        })}
+      </div>
+      <p style={{ fontFamily: sans, fontSize: 11, color: C.faint, textAlign: "center", marginTop: 14 }}>
+        Saved to your account automatically — comes back tomorrow with a fresh checklist.
+      </p>
+    </div>
+  );
+}

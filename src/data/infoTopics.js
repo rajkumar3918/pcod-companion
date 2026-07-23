@@ -1,0 +1,83 @@
+import {
+  Sparkles, AlertTriangle, Heart, Droplets, UtensilsCrossed, Sunrise, Leaf,
+} from "lucide-react";
+import { C } from "./theme";
+
+export const INFO_TOPICS = [
+  { id: "principles", title: "Core Principles", icon: Sparkles, color: C.forest, bg: C.forestLight,
+    items: [
+      "Low-GI carbs, not zero carbs — whole grains over maida/white rice.",
+      "Protein + fiber at every meal to steady blood sugar.",
+      "Healthy fats needed for hormone balance — don't go low-fat.",
+      "Iron + Vitamin C together — priority given low hemoglobin.",
+      "Small, frequent meals — easier on headache/nausea days.",
+      "Tea/coffee only between meals, never with food — blocks iron absorption.",
+      "Eat every 3–4 hours to keep blood sugar stable.",
+      "Sleep before 11 PM — late nights spike cortisol and worsen symptoms.",
+    ] },
+  { id: "empty", title: "On Empty Stomach", icon: Sunrise, color: C.sage, bg: C.sageLight,
+    items: [
+      "Best (good days only): fenugreek water — soak 1 tsp overnight, drink warm.",
+      "Gentler options: plain warm water, soaked raisins/dates, 4–5 soaked almonds.",
+      "Avoid: lemon water, apple cider vinegar, black coffee — acidic on an empty, nausea-prone stomach.",
+      "Short walk (10–15 min) only on days she's already eaten something.",
+    ] },
+  { id: "include", title: "Foods to Include", icon: Leaf, color: C.olive, bg: C.oliveLight,
+    items: [
+      "Seeds: flaxseed, pumpkin, sesame, sunflower — 1 tbsp/day mixed.",
+      "Nuts & dry fruit: almonds (soaked), walnuts, dates.",
+      "Vegetables: lauki, ridge gourd, bhindi, cabbage, cauliflower, carrot, beetroot.",
+      "Leafy greens: spinach, methi, moringa, amaranth — iron priority.",
+      "Veg protein: dal, paneer, curd, soy chunks, sprouts, tofu, rajma, chickpeas.",
+      "If eating non-veg: eggs, chicken/fish 2–3x/week.",
+      "Spices: turmeric + black pepper, cinnamon, ginger, jaggery in small amounts.",
+    ] },
+  { id: "avoid", title: "Strict Foods to Avoid", icon: AlertTriangle, color: C.rose, bg: C.roseLight,
+    items: [
+      "White bread, maida, bakery items.",
+      "Sugary drinks, packaged juices, soda.",
+      "Deep-fried food — chips, fries, fried snacks.",
+      "Processed/deli meats (if non-veg).",
+      "White rice/potato eaten alone, in large amounts.",
+      "Packaged/processed snacks — namkeen, instant noodles.",
+      "Alcohol.",
+      "No need to fear ordinary rice, dairy, or fruit — avoid these regularly, not with extreme restriction.",
+    ] },
+  { id: "lifestyle", title: "Lifestyle", icon: Heart, color: C.plum, bg: C.plumLight,
+    items: [
+      "30 min movement most days; light strength training 2–3x/week.",
+      "7–8 hours sleep, consistent timing.",
+      "10 min/day stress reset — breathing, yoga, or a walk outside.",
+      "8–10 glasses water daily; don't skip meals.",
+      "Track period dates, flow, pain and headaches for the doctor visit.",
+      "15–20 min morning sun, a few times a week.",
+    ] },
+  { id: "iron", title: "Iron & Hormone Boosters", icon: Droplets, color: C.slate, bg: C.slateLight,
+    items: [
+      "Spinach, beetroot, pomegranate, dates, ragi, mushroom — iron priority after heavy bleeding.",
+      "Pair every iron-rich meal with lemon, orange or amla for 2–3x better absorption.",
+      "Spearmint tea (1–2 cups/day) — clinical trials show it may lower androgen levels over weeks.",
+      "Fenugreek — evidence for improved insulin sensitivity.",
+      "Seed cycling (pumpkin + flax days 1–14, sunflower + sesame days 15–28) — promising but still emerging evidence.",
+      "Ashwagandha / Shatavari — only if a doctor prescribes them.",
+    ] },
+  { id: "portions", title: "Portion Guide", icon: UtensilsCrossed, color: C.mustard, bg: C.mustardLight,
+    items: [
+      "Roti/chapati: 1 medium ≈ 40g.",
+      "Cooked rice: 3/4 cup ≈ 150g.",
+      "Dal/curry: 1 katori ≈ 150g.",
+      "Paneer/tofu: 60–80g   ·   Curd: 1/2 cup ≈ 100g.",
+      "Nuts: 8–10 pieces ≈ 10–15g   ·   Seeds: 1 tbsp ≈ 10g.",
+      "Vegetables (cooked): 1/2–1 cup per meal.",
+      "Oil/ghee: 1–2 tsp per meal, not per dish.",
+    ] },
+  { id: "care", title: "When to Seek Care", icon: AlertTriangle, color: C.rose, bg: C.roseLight,
+    items: [
+      "Soaking a pad/cloth within an hour, repeatedly.",
+      "Can't keep food or water down for 24+ hours.",
+      "Severe dizziness, fainting, or breathlessness.",
+      "Sudden or \"worst ever\" headache with vision change, confusion, or weakness.",
+      "This app supports daily eating — it does not replace a doctor's care.",
+    ] },
+];
+export default INFO_TOPICS;
