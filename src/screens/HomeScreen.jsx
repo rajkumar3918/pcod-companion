@@ -13,7 +13,7 @@ export default function HomeScreen({ onOpenTopic, onGoToDiet }) {
     <div style={{ padding: "22px 16px 20px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 42, height: 42, borderRadius: 13, background: `linear-gradient(135deg, ${C.forest}, ${C.forestDark})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <div className="anim-scale-in" style={{ width: 42, height: 42, borderRadius: 13, background: C.gradForest, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 6px 16px rgba(14,107,79,0.28)" }}>
             <Leaf size={20} color={C.white} />
           </div>
           <div>
@@ -23,10 +23,10 @@ export default function HomeScreen({ onOpenTopic, onGoToDiet }) {
             </p>
           </div>
         </div>
-        <button onClick={clearProfile} title="Switch profile" style={{
+        <button onClick={clearProfile} title="Switch profile" className="btn-tap" style={{
           border: "none", background: profile ? (profile.color || C.forest) : C.white, borderRadius: "50%",
           width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
-          boxShadow: "0 2px 6px rgba(40,39,31,0.12)",
+          boxShadow: C.shadowSm,
         }}>
           {profile
             ? <span style={{ fontFamily: serif, fontWeight: 700, fontSize: 13, color: C.white }}>{profile.name.charAt(0).toUpperCase()}</span>
@@ -35,12 +35,13 @@ export default function HomeScreen({ onOpenTopic, onGoToDiet }) {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: isDesktop ? "repeat(3, 1fr)" : "1fr 1fr", gap: 12, marginBottom: 24 }}>
-        {INFO_TOPICS.map((topic) => {
+        {INFO_TOPICS.map((topic, i) => {
           const Icon = topic.icon;
           return (
-            <button key={topic.id} onClick={() => onOpenTopic(topic)} style={{
+            <button key={topic.id} onClick={() => onOpenTopic(topic)} className="btn-tap card-hover anim-scale-in" style={{
+              animationDelay: `${i * 0.04}s`,
               textAlign: "left", border: `1px solid ${C.line}`, background: C.white, borderRadius: 16,
-              padding: "14px 12px", cursor: "pointer", boxShadow: "0 2px 8px rgba(40,39,31,0.04)",
+              padding: "14px 12px", cursor: "pointer", boxShadow: C.shadowSm,
             }}>
               <IconBadge Icon={Icon} color={topic.color} bg={topic.bg} size={30} />
               <p style={{ fontFamily: sans, fontWeight: 700, fontSize: 12.5, color: C.ink, margin: "9px 0 0", lineHeight: 1.3 }}>{topic.title}</p>
@@ -49,10 +50,10 @@ export default function HomeScreen({ onOpenTopic, onGoToDiet }) {
         })}
       </div>
 
-      <button onClick={onGoToDiet} style={{
-        width: "100%", border: "none", background: `linear-gradient(135deg, ${C.forest}, ${C.forestDark})`,
+      <button onClick={onGoToDiet} className="btn-tap anim-slide-up" style={{
+        width: "100%", border: "none", background: C.gradForest,
         color: C.white, borderRadius: 18, padding: "17px 18px", display: "flex", alignItems: "center", justifyContent: "space-between",
-        cursor: "pointer", boxShadow: "0 8px 20px rgba(47,82,51,0.28)",
+        cursor: "pointer", boxShadow: "0 10px 26px rgba(14,107,79,0.3)", animationDelay: ".1s",
       }}>
         <span style={{ textAlign: "left" }}>
           <p style={{ fontFamily: serif, fontWeight: 700, fontSize: 17, margin: 0 }}>Go to today's diet</p>

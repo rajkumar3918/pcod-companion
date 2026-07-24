@@ -1,11 +1,9 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// All values come from .env (copy .env.example to .env and fill in
+// from Firebase console > Project settings > General > Your apps).
 const firebaseConfig = {
   apiKey: "AIzaSyClBAuPtwDNvzKzl0_jL7IoQUGIymP972Q",
   authDomain: "pcod-companion.firebaseapp.com",

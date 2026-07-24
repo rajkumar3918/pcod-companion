@@ -67,7 +67,7 @@ export default function TrackerScreen() {
       <p style={{ fontFamily: serif, fontWeight: 700, fontSize: 23, color: C.ink, margin: "0 0 4px" }}>Daily habits</p>
       <p style={{ fontFamily: sans, fontSize: 12.5, color: C.muted, margin: "0 0 18px" }}>Small consistent habits move PCOD markers over weeks, not days.</p>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 16, background: C.white, border: `1px solid ${C.line}`, borderRadius: 18, padding: "16px 18px", marginBottom: 18, boxShadow: "0 2px 10px rgba(40,39,31,0.05)" }}>
+      <div className="anim-slide-up" style={{ display: "flex", alignItems: "center", gap: 16, background: C.white, border: `1px solid ${C.line}`, borderRadius: 18, padding: "16px 18px", marginBottom: 18, boxShadow: C.shadowSm }}>
         <div style={{ width: 62, height: 62, borderRadius: "50%", background: `conic-gradient(${C.forest} ${pct * 3.6}deg, ${C.forestLight} 0deg)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <div style={{ width: 48, height: 48, borderRadius: "50%", background: C.white, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <span style={{ fontFamily: sans, fontWeight: 800, fontSize: 13, color: C.forest }}>{pct}%</span>
@@ -82,17 +82,17 @@ export default function TrackerScreen() {
         </div>
       </div>
 
-      <div style={{ background: C.white, borderRadius: 18, border: `1px solid ${C.line}`, overflow: "hidden" }}>
+      <div className="anim-slide-up" style={{ background: C.white, borderRadius: 18, border: `1px solid ${C.line}`, overflow: "hidden", boxShadow: C.shadowSm, animationDelay: ".05s" }}>
         {HABITS.map((h, i) => {
           const isOn = !!checked[h.id];
           return (
-            <button key={h.id} onClick={() => toggle(h.id)} style={{
+            <button key={h.id} onClick={() => toggle(h.id)} className="btn-tap" style={{
               width: "100%", display: "flex", alignItems: "center", gap: 12, textAlign: "left",
               border: "none", background: "none", padding: "13px 16px",
               borderBottom: i < HABITS.length - 1 ? `1px solid ${C.line}` : "none", cursor: "pointer",
             }}>
-              <div style={{ width: 22, height: 22, borderRadius: 7, flexShrink: 0, border: isOn ? "none" : `2px solid ${C.line}`, background: isOn ? C.forest : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {isOn && <Check size={14} color={C.white} strokeWidth={3} />}
+              <div style={{ width: 22, height: 22, borderRadius: 7, flexShrink: 0, border: isOn ? "none" : `2px solid ${C.line}`, background: isOn ? C.gradForest : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {isOn && <Check size={14} color={C.white} strokeWidth={3} className="anim-pop" />}
               </div>
               <span style={{ fontFamily: sans, fontSize: 13.5, color: isOn ? C.faint : C.ink, textDecoration: isOn ? "line-through" : "none", fontWeight: 600 }}>{h.label}</span>
             </button>

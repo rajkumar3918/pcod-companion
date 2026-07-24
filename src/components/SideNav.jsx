@@ -1,5 +1,7 @@
-import { Home, UtensilsCrossed, ClipboardList, CalendarDays, Leaf } from "lucide-react";
+import { Home, UtensilsCrossed, ClipboardList, CalendarDays, Leaf, Users, LogOut } from "lucide-react";
 import { sans, serif, C } from "../data/theme";
+import { useAuth } from "../contexts/AuthContext";
+import { useProfile } from "../contexts/ProfileContext";
 
 const items = [
   { id: "/", label: "Home", icon: Home },
@@ -9,6 +11,9 @@ const items = [
 ];
 
 export default function SideNav({ active, onNavigate }) {
+  const { logOut } = useAuth();
+  const { clearProfile } = useProfile();
+
   return (
     <div style={{
       width: 220, flexShrink: 0, borderRight: `1px solid ${C.line}`, background: C.white,
@@ -26,7 +31,7 @@ export default function SideNav({ active, onNavigate }) {
         const Icon = it.icon;
         const isActive = active === it.id;
         return (
-          <button key={it.id} onClick={() => onNavigate(it.id)} style={{
+          <button key={it.id} onClick={() => onNavigate(it.id)} className="btn-tap" style={{
             display: "flex", alignItems: "center", gap: 12, border: "none",
             background: isActive ? C.forestLight : "none", color: isActive ? C.forest : C.muted,
             borderRadius: 12, padding: "11px 14px", marginBottom: 4, cursor: "pointer",
@@ -37,6 +42,25 @@ export default function SideNav({ active, onNavigate }) {
           </button>
         );
       })}
+
+      <div style={{ marginTop: "auto", paddingTop: 14, borderTop: `1px solid ${C.line}` }}>
+        <button onClick={clearProfile} className="btn-tap" style={{
+          display: "flex", alignItems: "center", gap: 12, border: "none", background: "none",
+          color: C.muted, borderRadius: 12, padding: "11px 14px", cursor: "pointer",
+          fontFamily: sans, fontSize: 13.5, fontWeight: 700, textAlign: "left", width: "100%",
+        }}>
+          <Users size={17} />
+          Switch profile
+        </button>
+        <button onClick={logOut} className="btn-tap" style={{
+          display: "flex", alignItems: "center", gap: 12, border: "none", background: "none",
+          color: C.faint, borderRadius: 12, padding: "11px 14px", cursor: "pointer",
+          fontFamily: sans, fontSize: 13.5, fontWeight: 700, textAlign: "left", width: "100%",
+        }}>
+          <LogOut size={17} />
+          Log out
+        </button>
+      </div>
     </div>
   );
 }

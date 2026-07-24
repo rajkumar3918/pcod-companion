@@ -1,35 +1,48 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { useAuth } from "./AuthContext";
 
-const STORAGE_KEY = "pcod_active_profile";
-const ProfileContext = createContext({ profile: null, setProfile: () => {}, clearProfile: () => {} });
+const STORAGE_PREFIX = "pcod_active_profile_";
+const ProfileContext = createContext({ profile: null, setProfile: () => {}, clearProfile: () => {}, ready: false });
 
-// Remembers the last-picked profile on this device/browser, the same way
-// a shared family tablet would — not tied to any account, just local.
+// Remembers the last-picked profile per signed-in account (keyed by uid), so
+// on a shared device logging in as a different phone number doesn't show
+// the previous person's profile, and logging back in restores your own pick.
 export function ProfileProvider({ children }) {
+  const { user } = useAuth();
   const [profile, setProfileState] = useState(null);
   const [ready, setReady] = useState(false);
 
+  const storageKey = user ? `${STORAGE_PREFIX}${user.uid}` : null;
+
   useEffect(() => {
+    if (!storageKey) {
+      // No signed-in user yet (or just logged out) — nothing to restore.
+      setProfileState(null);
+      setReady(true);
+      return;
+    }
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setProfileState(JSON.parse(raw));
+      const raw = localStorage.getItem(storageKey);
+      setProfileState(raw ? JSON.parse(raw) : null);
     } catch (e) {
-      // ignore corrupt/missing storage
+      setProfileState(null);
     }
     setReady(true);
-  }, []);
+  }, [storageKey]);
 
   const setProfile = (p) => {
     setProfileState(p);
+    if (!storageKey) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+      localStorage.setItem(storageKey, JSON.stringify(p));
     } catch (e) { /* storage unavailable, profile still works for this session */ }
   };
 
   const clearProfile = () => {
     setProfileState(null);
+    if (!storageKey) return;
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(storageKey);
     } catch (e) { /* ignore */ }
   };
 

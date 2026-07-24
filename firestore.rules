@@ -1,18 +1,25 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{deviceId} {
-      // deviceId is an anonymous Firebase Auth uid, not a real account —
-      // still enforced server-side so a stranger with just the URL can't
-      // read or write another device's profiles/data.
-      allow read, write: if request.auth != null && request.auth.uid == deviceId;
+    match /users/{accountId} {
+      // accountId is the Firebase Auth uid tied to a signed-in Google account.
+      // Signing in with the same Google account (any device) resolves to the
+      // same uid, which is why access to an account requires that Google
+      // account's credentials, not just knowing who owns it.
+      allow read, write: if request.auth != null && request.auth.uid == accountId;
 
       match /profiles/{profileId} {
-        allow read, write: if request.auth != null && request.auth.uid == deviceId;
+        allow read, write: if request.auth != null && request.auth.uid == accountId;
 
         match /logs/{date} {
-          allow read, write: if request.auth != null && request.auth.uid == deviceId;
+          allow read, write: if request.auth != null && request.auth.uid == accountId;
         }
+      }
+
+      match /household/{doc} {
+        // Shared pantry/shopping-list state — same account-level access as
+        // everything else here, just not nested under any one profile.
+        allow read, write: if request.auth != null && request.auth.uid == accountId;
       }
     }
   }
