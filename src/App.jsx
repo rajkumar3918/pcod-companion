@@ -1,27 +1,41 @@
 import { useState } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { ProfileProvider, useProfile } from "./contexts/ProfileContext";
+import { useViewport } from "./utils/useViewport";
 import { C, FONT_IMPORT, sans } from "./data/theme";
-import LoginScreen from "./screens/LoginScreen";
-import SignupScreen from "./screens/SignupScreen";
+import ProfileSelectScreen from "./screens/ProfileSelectScreen";
 import HomeScreen from "./screens/HomeScreen";
 import DietScreen from "./screens/DietScreen";
 import TrackerScreen from "./screens/TrackerScreen";
 import CalendarScreen from "./screens/CalendarScreen";
 import InfoDetailScreen from "./screens/InfoDetailScreen";
 import BottomNav from "./components/BottomNav";
+import SideNav from "./components/SideNav";
 
-function AuthGate() {
-  const { user, loading } = useAuth();
-  const [authScreen, setAuthScreen] = useState("login");
+function Gate() {
+  const { user, loading: authLoading } = useAuth();
+  const { profile, ready: profileReady } = useProfile();
 
-  if (loading) {
+  if (authLoading || !profileReady) {
     return <div style={{ padding: 24, fontFamily: sans, color: C.muted, fontSize: 13, textAlign: "center" }}>Loading…</div>;
   }
 
   if (!user) {
-    return authScreen === "login"
-      ? <LoginScreen onGoToSignup={() => setAuthScreen("signup")} />
-      : <SignupScreen onGoToLogin={() => setAuthScreen("login")} />;
+    return (
+      <div style={{ padding: 24, fontFamily: sans, color: C.rose, fontSize: 13, textAlign: "center", maxWidth: 420, margin: "60px auto" }}>
+        Couldn't connect. Make sure Anonymous sign-in is enabled in your Firebase console under Authentication → Sign-in method.
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: "100%", maxWidth: 420 }}>
+          <ProfileSelectScreen />
+        </div>
+      </div>
+    );
   }
 
   return <AppShell />;
@@ -31,6 +45,7 @@ function AppShell() {
   const [tab, setTab] = useState("/");
   const [topic, setTopic] = useState(null);
   const [showTopic, setShowTopic] = useState(false);
+  const { isDesktop } = useViewport();
 
   const openTopic = (t) => { setTopic(t); setShowTopic(true); };
   const closeTopic = () => setShowTopic(false);
@@ -49,30 +64,34 @@ function AppShell() {
     content = <CalendarScreen />;
   }
 
+  if (isDesktop) {
+    return (
+      <div style={{ display: "flex", minHeight: "100vh", background: C.cream }}>
+        <SideNav active={tab} onNavigate={navigate} />
+        <div style={{ flex: 1, display: "flex", justifyContent: "center", padding: "36px 32px" }}>
+          <div style={{ width: "100%", maxWidth: 760 }}>{content}</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <>
+    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", background: C.cream }}>
       <div style={{ flex: 1, overflowY: "auto" }}>{content}</div>
       <BottomNav active={tab} onNavigate={navigate} />
-    </>
+    </div>
   );
 }
 
 export default function App() {
   return (
-    <div style={{ display: "flex", justifyContent: "center", padding: "24px 12px", background: "transparent", minHeight: "100vh" }}>
+    <div style={{ background: C.cream, minHeight: "100vh" }}>
       <style>{FONT_IMPORT}</style>
-      <div style={{
-        width: 390, minHeight: 760, maxWidth: "100%", background: C.cream, borderRadius: 36,
-        border: `8px solid ${C.ink}`, boxShadow: "0 24px 60px rgba(0,0,0,0.20)",
-        overflow: "hidden", position: "relative", display: "flex", flexDirection: "column",
-      }}>
-        <div style={{ height: 24, background: C.ink, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <div style={{ width: 64, height: 5, borderRadius: 3, background: "#565650" }} />
-        </div>
-        <AuthProvider>
-          <AuthGate />
-        </AuthProvider>
-      </div>
+      <AuthProvider>
+        <ProfileProvider>
+          <Gate />
+        </ProfileProvider>
+      </AuthProvider>
     </div>
   );
 }

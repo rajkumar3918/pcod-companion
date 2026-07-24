@@ -1,28 +1,13 @@
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-} from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "./config";
+import { signInAnonymously, onAuthStateChanged } from "firebase/auth";
+import { auth } from "./config";
 
-export async function signUp(email, password, displayName) {
-  const cred = await createUserWithEmailAndPassword(auth, email, password);
-  await setDoc(doc(db, "users", cred.user.uid), {
-    displayName: displayName || email.split("@")[0],
-    createdAt: serverTimestamp(),
-  });
-  return cred.user;
-}
-
-export async function signIn(email, password) {
-  const cred = await signInWithEmailAndPassword(auth, email, password);
-  return cred.user;
-}
-
-export async function signOutUser() {
-  await signOut(auth);
+// No login screen — every device silently gets a stable anonymous identity.
+// This is NOT "no security": Firestore rules still require a matching
+// auth.uid, so a stranger with just the URL can't read/write your data.
+// It just means there's no email/password to manage for a shared-device
+// family app with a handful of profiles.
+export function ensureAnonymousAuth() {
+  return signInAnonymously(auth);
 }
 
 export function subscribeToAuth(callback) {

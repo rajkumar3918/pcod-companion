@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { subscribeToAuth } from "../firebase/auth";
+import { ensureAnonymousAuth, subscribeToAuth } from "../firebase/auth";
 
 const AuthContext = createContext({ user: null, loading: true });
 
@@ -8,6 +8,9 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    ensureAnonymousAuth().catch((err) => {
+      console.error("Anonymous sign-in failed — check that Anonymous auth is enabled in the Firebase console.", err);
+    });
     const unsub = subscribeToAuth((u) => {
       setUser(u);
       setLoading(false);

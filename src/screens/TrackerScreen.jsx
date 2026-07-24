@@ -4,19 +4,18 @@ import { sans, serif, C } from "../data/theme";
 import { HABITS } from "../data/habits";
 import { todayKey } from "../utils/dates";
 import { useAuth } from "../contexts/AuthContext";
+import { useProfile } from "../contexts/ProfileContext";
 import { getLog, setLog } from "../firebase/firestore";
 
-// Streak = consecutive days (walking backward from today, or from
-// yesterday if nothing is checked yet today) with at least one habit done.
-async function computeStreak(uid) {
+async function computeStreak(uid, profileId) {
   let count = 0;
-  const todayLog = await getLog(uid, todayKey(0));
+  const todayLog = await getLog(uid, profileId, todayKey(0));
   const todayHabits = todayLog && todayLog.habits ? todayLog.habits : {};
   const todayHasAny = Object.values(todayHabits).some(Boolean);
   let offset = todayHasAny ? 0 : 1;
   if (offset === 0) count = 1;
   for (let i = offset; i < 45; i++) {
-    const log = await getLog(uid, todayKey(i));
+    const log = await getLog(uid, profileId, todayKey(i));
     const habits = log && log.habits ? log.habits : {};
     if (Object.values(habits).some(Boolean)) count++;
     else break;
@@ -26,32 +25,33 @@ async function computeStreak(uid) {
 
 export default function TrackerScreen() {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const [checked, setChecked] = useState({});
   const [streak, setStreak] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
-    if (!user) return;
+    if (!user || !profile) return;
     (async () => {
-      const log = await getLog(user.uid, todayKey(0));
+      const log = await getLog(user.uid, profile.id, todayKey(0));
       if (mounted) setChecked((log && log.habits) || {});
-      const s = await computeStreak(user.uid);
+      const s = await computeStreak(user.uid, profile.id);
       if (mounted) setStreak(s);
       if (mounted) setLoading(false);
     })();
     return () => { mounted = false; };
-  }, [user]);
+  }, [user, profile]);
 
   const toggle = async (id) => {
     const next = { ...checked, [id]: !checked[id] };
     setChecked(next);
     try {
-      await setLog(user.uid, todayKey(0), { habits: next });
+      await setLog(user.uid, profile.id, todayKey(0), { habits: next });
     } catch (e) {
       console.error("Failed to save habit", e);
     }
-    const s = await computeStreak(user.uid);
+    const s = await computeStreak(user.uid, profile.id);
     setStreak(s);
   };
 
@@ -100,7 +100,7 @@ export default function TrackerScreen() {
         })}
       </div>
       <p style={{ fontFamily: sans, fontSize: 11, color: C.faint, textAlign: "center", marginTop: 14 }}>
-        Saved to your account automatically — comes back tomorrow with a fresh checklist.
+        Saved automatically to this profile — comes back tomorrow with a fresh checklist.
       </p>
     </div>
   );

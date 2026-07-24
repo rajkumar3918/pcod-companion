@@ -6,6 +6,7 @@ import { HABITS } from "../data/habits";
 import { CONDITIONS } from "../data/conditions";
 import { monthKey } from "../utils/dates";
 import { useAuth } from "../contexts/AuthContext";
+import { useProfile } from "../contexts/ProfileContext";
 import { listLogsForMonth } from "../firebase/firestore";
 
 function conditionColor(id) {
@@ -15,6 +16,7 @@ function conditionColor(id) {
 
 export default function CalendarScreen() {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const [cursor, setCursor] = useState(new Date()); // any date within the viewed month
   const [logs, setLogs] = useState({});
   const [loading, setLoading] = useState(true);
@@ -22,14 +24,14 @@ export default function CalendarScreen() {
 
   useEffect(() => {
     let mounted = true;
-    if (!user) return;
+    if (!user || !profile) return;
     setLoading(true);
     (async () => {
-      const data = await listLogsForMonth(user.uid, monthKey(cursor));
+      const data = await listLogsForMonth(user.uid, profile.id, monthKey(cursor));
       if (mounted) { setLogs(data); setLoading(false); }
     })();
     return () => { mounted = false; };
-  }, [user, cursor]);
+  }, [user, profile, cursor]);
 
   const grid = useMemo(() => {
     const year = cursor.getFullYear();

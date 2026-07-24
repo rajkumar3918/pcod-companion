@@ -1,12 +1,13 @@
-import { Leaf, ChevronRight, LogOut } from "lucide-react";
+import { Leaf, ChevronRight, Users } from "lucide-react";
+import { useViewport } from "../utils/useViewport";
 import { sans, serif, C } from "../data/theme";
 import { INFO_TOPICS } from "../data/infoTopics";
-import { signOutUser } from "../firebase/auth";
-import { useAuth } from "../contexts/AuthContext";
+import { useProfile } from "../contexts/ProfileContext";
 import IconBadge from "../components/IconBadge";
 
 export default function HomeScreen({ onOpenTopic, onGoToDiet }) {
-  const { user } = useAuth();
+  const { profile, clearProfile } = useProfile();
+  const { isDesktop } = useViewport();
 
   return (
     <div style={{ padding: "22px 16px 20px" }}>
@@ -18,16 +19,22 @@ export default function HomeScreen({ onOpenTopic, onGoToDiet }) {
           <div>
             <p style={{ fontFamily: sans, fontSize: 11, color: C.muted, letterSpacing: 1, textTransform: "uppercase", margin: 0, fontWeight: 800 }}>PCOD Companion</p>
             <p style={{ fontFamily: serif, fontWeight: 700, fontSize: 21, color: C.ink, margin: 0 }}>
-              Hi{user && user.email ? "" : ""}, take care today.
+              {profile ? `Hi ${profile.name}` : "Take care, today."}
             </p>
           </div>
         </div>
-        <button onClick={signOutUser} title="Sign out" style={{ border: "none", background: C.white, borderRadius: "50%", width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 6px rgba(40,39,31,0.08)" }}>
-          <LogOut size={15} color={C.muted} />
+        <button onClick={clearProfile} title="Switch profile" style={{
+          border: "none", background: profile ? (profile.color || C.forest) : C.white, borderRadius: "50%",
+          width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+          boxShadow: "0 2px 6px rgba(40,39,31,0.12)",
+        }}>
+          {profile
+            ? <span style={{ fontFamily: serif, fontWeight: 700, fontSize: 13, color: C.white }}>{profile.name.charAt(0).toUpperCase()}</span>
+            : <Users size={15} color={C.muted} />}
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: isDesktop ? "repeat(3, 1fr)" : "1fr 1fr", gap: 12, marginBottom: 24 }}>
         {INFO_TOPICS.map((topic) => {
           const Icon = topic.icon;
           return (

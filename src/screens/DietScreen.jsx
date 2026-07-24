@@ -4,24 +4,27 @@ import { SLOTS } from "../data/slots";
 import { CONDITIONS } from "../data/conditions";
 import { todayKey } from "../utils/dates";
 import { useAuth } from "../contexts/AuthContext";
+import { useProfile } from "../contexts/ProfileContext";
 import { getLog, setLog } from "../firebase/firestore";
 import PillButton from "../components/PillButton";
 import MealCard from "../components/MealCard";
 import ShoppingListCard from "../components/ShoppingListCard";
+import { useViewport } from "../utils/useViewport";
 
 export default function DietScreen() {
   const { user } = useAuth();
+  const { profile } = useProfile();
+  const { isDesktop } = useViewport();
   const [condition, setCondition] = useState("normal");
-  const [selections, setSelections] = useState({}); // { [slotId]: mealName } for today
+  const [selections, setSelections] = useState({});
   const [listOpen, setListOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Load today's saved log once on mount (or when the user changes).
   useEffect(() => {
     let mounted = true;
-    if (!user) return;
+    if (!user || !profile) return;
     (async () => {
-      const log = await getLog(user.uid, todayKey(0));
+      const log = await getLog(user.uid, profile.id, todayKey(0));
       if (mounted && log) {
         setCondition(log.condition || "normal");
         setSelections(log.meals || {});
@@ -29,15 +32,13 @@ export default function DietScreen() {
       if (mounted) setLoading(false);
     })();
     return () => { mounted = false; };
-  }, [user]);
+  }, [user, profile]);
 
   const persist = async (nextCondition, nextSelections) => {
-    if (!user) return;
+    if (!user || !profile) return;
     try {
-      await setLog(user.uid, todayKey(0), { condition: nextCondition, meals: nextSelections });
+      await setLog(user.uid, profile.id, todayKey(0), { condition: nextCondition, meals: nextSelections });
     } catch (e) {
-      // Non-fatal: UI already updated optimistically; a retry on next
-      // change will resync. Consider surfacing a toast here in production.
       console.error("Failed to save diet log", e);
     }
   };
@@ -59,7 +60,9 @@ export default function DietScreen() {
 
   return (
     <div style={{ padding: "18px 16px 24px" }}>
-      <p style={{ fontFamily: serif, fontWeight: 700, fontSize: 23, color: C.ink, margin: "0 0 14px" }}>Today's diet</p>
+      <p style={{ fontFamily: serif, fontWeight: 700, fontSize: 23, color: C.ink, margin: "0 0 14px" }}>
+        {profile ? `${profile.name}'s diet` : "Today's diet"}
+      </p>
 
       <p style={{ fontFamily: sans, fontSize: 12.5, color: C.muted, margin: "0 0 8px", fontWeight: 700 }}>How is she feeling today?</p>
       <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
@@ -72,15 +75,17 @@ export default function DietScreen() {
 
       <ShoppingListCard condition={condition} selections={selections} open={listOpen} onToggle={() => setListOpen(!listOpen)} />
 
-      {SLOTS.map((slot) => (
-        <MealCard
-          key={slot.id} slot={slot} condition={condition}
-          selectedName={selections[slot.id]} onChange={(name) => setMealFor(slot.id, name)}
-        />
-      ))}
+      <div style={isDesktop ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 } : undefined}>
+        {SLOTS.map((slot) => (
+          <MealCard
+            key={slot.id} slot={slot} condition={condition}
+            selectedName={selections[slot.id]} onChange={(name) => setMealFor(slot.id, name)}
+          />
+        ))}
+      </div>
 
       <p style={{ fontFamily: sans, fontSize: 11.5, color: C.faint, textAlign: "center", marginTop: 6 }}>
-        Meals rotate automatically each day. Changes save to your account automatically.
+        Meals rotate automatically each day. Changes save automatically to this profile.
       </p>
     </div>
   );
